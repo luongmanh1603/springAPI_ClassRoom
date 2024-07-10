@@ -65,6 +65,19 @@ public class StudentController {
 
         return ResponseEntity.ok(studentService.convertToDTO(updatedStudent));
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteStudent(@PathVariable Long id) {
+        Student existingStudent = studentService.getStudentById(id).orElse(null);
+        if (existingStudent == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Integer classId = existingStudent.getClassRoom().getId_class();
+        studentService.deleteStudent(id);
+        classRoomService.updateNumberMember(classId);
+
+        return ResponseEntity.ok().build();
+    }
 
 
 
