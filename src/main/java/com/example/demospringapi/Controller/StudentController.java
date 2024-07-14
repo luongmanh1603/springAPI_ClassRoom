@@ -4,6 +4,8 @@ import com.example.demospringapi.Service.ClassRoomService;
 import com.example.demospringapi.Service.StudentService;
 import com.example.demospringapi.dto.StudentDTO;
 import com.example.demospringapi.entity.Student;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -13,12 +15,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/student")
+@CrossOrigin(origins = "http://localhost:3000")
+@Tag(name = "Student", description = "API for student management")
 public class StudentController {
     @Autowired
     private StudentService studentService;
     @Autowired
     private ClassRoomService classRoomService;
 
+    @Operation(summary = "Get all students")
     @GetMapping("")
     public List<StudentDTO> getAllStudents() {
         List<Student> students = studentService.getAllStudents();
@@ -28,6 +33,7 @@ public class StudentController {
         }
         return studentDTOs;
     }
+    @Operation(summary = "Get student by ID")
     @GetMapping("/{id}")
     public StudentDTO getStudentById(@PathVariable Long id) {
         Student student = studentService.getStudentById(id).orElse(null);
@@ -36,12 +42,14 @@ public class StudentController {
         }
         return studentService.convertToDTO(student);
     }
+    @Operation(summary = "Create a new student")
     @PostMapping("")
     public Student createStudent(@RequestBody Student student) {
         Student savedStudent = studentService.saveStudent(student);
         classRoomService.updateNumberMember(savedStudent.getClassRoom().getId_class());
         return studentService.saveStudent(student);
     }
+    @Operation(summary = "Update a student")
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody Student studentDetails) {
         Student existingStudent = studentService.getStudentById(id).orElse(null);
@@ -65,6 +73,7 @@ public class StudentController {
 
         return ResponseEntity.ok(studentService.convertToDTO(updatedStudent));
     }
+    @Operation(summary = "Delete a student")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteStudent(@PathVariable Long id) {
         Student existingStudent = studentService.getStudentById(id).orElse(null);
