@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/classrooms")
 @CrossOrigin(origins = "http://localhost:3000")
+
 public class ClassRoomController {
     @Autowired
     private ClassRoomService classRoomService;
@@ -38,12 +39,24 @@ public class ClassRoomController {
             return ResponseEntity.badRequest().body("Class name already exists");
         }
         classRoom.setId_class(id);
-        return ResponseEntity.ok(classRoomService.saveClassRoom(classRoom));
+        ClassRoom updatedClassRoom = classRoomService.saveClassRoom(classRoom);
+        classRoomService.updateNumberMember(updatedClassRoom.getId_class());
+        return ResponseEntity.ok(updatedClassRoom);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteClassRoom(@PathVariable Integer id) {
-        classRoomService.deleteClassRoom(id);
-        return ResponseEntity.ok("Classroom deleted");
+        ClassRoom classRoom = classRoomService.getClassRoomById(id).orElse(null);
+        if (classRoom != null) {
+            if (!classRoom.getStudents().isEmpty()) {
+                return ResponseEntity.badRequest().body("Cannot delete class with students");
+        } else {
+            classRoomService.deleteClassRoom(id);
+            return ResponseEntity.ok("Classroom deleted");
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+
     }
 
 
